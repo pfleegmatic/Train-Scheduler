@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Train Schedule</title>
+
+  <!-- Link to the jQuery -->
+  <script src="https://code.jquery.com/jquery-2.2.3.js" integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4=" crossorigin="anonymous"></script>
+
+  <!-- Link to the Bootstrap-->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+  <!-- link to google fonts -->
+ <link href="https://fonts.googleapis.com/css?family=Cairo|Montserrat|Raleway|Titillium+Web" rel="stylesheet">
+
+  <!--Link to Firebase library--> 
+ <script src="https://www.gstatic.com/firebasejs/4.3.0/firebase.js"></script>
+
+  <!--Moment js, date library for parsing, validating, manipulating, and formatting dates-->
+
+<script src="https://cdn.jsdelivr.net/momentjs/2.18.1/moment.min.js"></script>
+  
+
+
+  <!-- style css file -->
+<link rel="stylesheet" href="assets/css/style.css">
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Jumbotron with Title -->
+    <div class="jumbotron">
+
+      <h1 class="text-center"><strong>Train Schedule</strong></h1>
+      <h2 class="text-center">Check your schedule prior to departure or arrival!</h2>
+      <h3 class="text-center">Kidding, there's no API or data pull from any real train lines here</h3>
+      <h3 class="text-center">Making up train lines to demo data storage in firebase</h3>
+    </div>
+
+<!--Train schedule panel-->
+      <div class="row">
+      
+          <div class ="col-lg-12">
+
+          <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h3 class ="panel-title current"><strong>Train Schedule</strong></h3>
+              </div> <!--close panel-heading-->
+
+            <div class="panel-body">
+              <table class="table table-hover" id="trainTable">
+                <thread>
+                  <tr>
+                    <th>Train Name</th>
+                   <!-- <th>Line</th>-->
+                    <th>Destination</th>
+                    <th>Next Arrival</th>
+                    <th>Frequency (minutes)</th>
+                    <th>Minutes Away</th>
+                  </tr>
+                </thread>
+
+                <tbody>
+
+                </tbody>
+              </table>
+
+            </div> <!--close panel-body-->
+          </div> <!--close panel-primary-->
+
+<!--Adding trains-->
+    <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class ="panel-title addition"><strong>Add Train Lines</strong></h3>
+            </div> <!--close panel-heading-->
+
+            <div class="panel-body">
+             <!--close panel body-->
+
+<!--Form-->
+      <form>
+          <div class ="form-group">
+            <label for="">Train Name</label>
+            <input type="text" class="form-control" id="trainNameInput">
+          </div>
+
+ <!--<div class = "form-group">
+    <label for="">Line</label>
+    <input type="text" class="form-control" id="trainLineInput">
+  </div> -->
+
+
+          <div class = "form-group">
+             <label for="">Destination</label>
+             <input type="text" class="form-control" id="destinationInput">
+          </div>
+
+          <div class = "form-group"><!--make a dropdown-->
+             <label for="">First Train Time (hh:mm)</label>
+             <input type="text" class="form-control" id="trainTimeInput">
+          </div>
+
+          <div class = "form-group">
+             <label for="">Frequency (minutes)</label>
+             <input type="text" class="form-control" id="frequencyInput">
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="addTrainBtn">Submit
+          </button>
+          <img src="assets/images/tinytrain.jpg" width= "90" height="60">
+
+      </form>
+
+    </div>  <!--close panel body for adding trains-->
+  </div> <!--close panel-primary for adding trains-->
+</div> <!--close class col-lg-12-->
+</div>  <!--close class row for all-->
+</div> <!--close container-->
+
+<!--javascript file-->
+<script src="assets/javascript/app.js"></script>
+
+<script>
+// Initialize Firebase ??"https://train-database.firebaseio.com/"
+  var config = {
+    apiKey: "AIzaSyDUFbkSrcv1by112f47fQfoTn9rUsjIGYo",
+    authDomain: "project-1-dc253.firebaseapp.com",
+    databaseURL: "https://project-1-dc253.firebaseio.com",
+    projectId: "project-1-dc253",
+    storageBucket: "project-1-dc253.appspot.com",
+    messagingSenderId: "838586150577"
+  };
+  firebase.initializeApp(config);
+  console.log(config);
+
+  var database = firebase.database();
+  console.log(database);
+
+//create click event when user submits form
+  $("#addTrainBtn").on("click", function(){
+
+    var trainName= $("#trainNameInput").val().trim();
+    var destinationName = $("#destinationInput").val().trim();
+    var firstTrainTime = moment($("#trainTimeInput").val().trim(),"HH:mm").format("HH:mm");
+    var frequencyTime = $("#frequencyInput").val().trim();
+  
+//create temp storage into an object of the user inputs; childSnapShot
+
+var newTrainInfo = {
+  name: trainName,
+  place: destinationName,
+  fTrainTime: firstTrainTime,
+  frequency: frequencyTime
+}
+
+//upload train data to database
+
+database.ref().push(newTrainInfo);
+console.log(newTrainInfo.name);
+
+//clears text from boxes. study .val()
+$("#trainNameInput").val("");
+$("#destinationInput").val("");
+$("#trainTimeInput").val("");
+$("#frequencyInput").val("");
+//prevents going to new page
+return false;
+});//close add train btn event
+
+//create firebase event
+database.ref().on("child_added", function(childSnapshot){//study firebase event and  childSnapShot
+  console.log(childSnapshot.val());
+
+//store childSnapSot values into a variable
+
+var trainName=childSnapshot.val().name;
+var destinationName=childSnapshot.val().place;
+var firstTrainTime=childSnapshot.val().fTrainTime;
+var frequencyTime =childSnapshot.val().frequency;
+
+
+//
+var firstTimeConverted = moment(firstTrainTime, "HH:mm");
+console.log(firstTimeConverted);
+
+//store format in current time
+var currentTime = moment().format("HH:mm");
+console.log("Current time: " + currentTime);
+
+//store time difference between current time and train arrival time in variable
+var timeDifference = moment().diff(moment(firstTimeConverted), "minutes");
+console.log(firstTrainTime); //store in fb
+console.log("Time Difference: " + timeDifference); //store in fb
+
+//calculate remaining time leftover and store in variable
+var timeRemainder = timeDifference % frequencyTime;
+console.log(timeRemainder); //store in fb
+
+//calculate minutes until train and store in variable
+var minutesTilTrain = frequencyTime - timeRemainder;//store in fb
+
+//when is the next train?
+var nextTrain = moment().add(minutesTilTrain,"minutes").format("HH:mm"); //store in fb
+//add tag to #trainTable at <tbody>
+$("#trainTable>tbody").append("<tr><td>" + trainName + "</td><td>" + destinationName + "</td><td>" + nextTrain + "</td><td>" + frequencyTime + "</td><td>" + minutesTilTrain +"</td><td>");
+});//close firebase on event
+
+
+// <tr> tag defines a row in an HTML table.
+// <td> regular cell in tale
+// <th> header cell in table
+
+//The <tbody> tag is used to group the body content in an HTML table.
+//The <tbody> element is used in conjunction with the <thead> and <tfoot> elements to specify each part of a table (body, header, footer).
+//Browsers can use these elements to enable scrolling of the table body independently of the header and footer. Also, when printing a large table that spans multiple pages, these elements can enable the table header and footer to be printed at the top and bottom of each page.
+//The <tbody> tag must be used in the following context: As a child of a <table> element, after any <caption>, <colgroup>, and <thead> elements.
+
+</script>
+
+
+
+      </body>
+      </html>
